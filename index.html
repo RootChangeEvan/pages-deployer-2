@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pages Deployer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f12;--surface:#161a1f;--surface2:#1e2329;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);
+  --text:#e8e3dc;--text2:rgba(232,227,220,.62);--text3:rgba(232,227,220,.38);
+  --green:#3dd68c;--green-dim:rgba(61,214,140,.12);--amber:#f5a623;--amber-dim:rgba(245,166,35,.1);
+  --red:#f06a6a;--red-dim:rgba(240,106,106,.1);--blue:#6fb0d2;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;min-height:100vh;padding:40px 16px 80px}
+.wrap{max-width:700px;margin:0 auto}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+header{margin-bottom:28px}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.logo-icon{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+h1{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.subtitle{font-size:13px;color:var(--text2)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+label,.lbl{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px}
+input[type=text],input[type=password],input[type=search],select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);outline:none;min-height:40px}
+input.mono,.mono{font-family:'DM Mono',monospace}
+textarea{resize:vertical;min-height:64px}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>input{flex:1;min-width:0}
+.btn{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;min-height:40px}
+.btn:hover{border-color:var(--text3)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:5px 10px;min-height:32px;font-size:12px}
+.btn.primary{width:100%;background:var(--green);color:#0a1a12;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:600}
+.btn.primary:hover{opacity:.9}
+.hint{font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5}
+.hint strong{color:var(--text2);font-weight:500}
+.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text);margin-bottom:10px;cursor:pointer}
+.check input{margin-top:3px;accent-color:var(--green);width:16px;height:16px;flex:none}
+.check small{display:block;color:var(--text3);font-size:12px}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:14px}
+.tab{flex:1;background:none;border:none;color:var(--text2);font:inherit;font-weight:500;padding:9px;border-radius:9px;cursor:pointer;min-height:40px}
+.tab[aria-selected=true]{background:var(--surface2);color:var(--text)}
+.drop-zone{background:var(--surface2);border:1.5px dashed var(--border2);border-radius:8px;padding:24px 16px;text-align:center;transition:all .15s}
+.drop-zone.over{border-color:var(--green);background:rgba(61,214,140,.04)}
+.drop-text{font-size:13px;color:var(--text2);margin-bottom:10px}
+.drop-text strong{color:var(--green);font-weight:500}
+.files{margin-top:10px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.file{display:flex;justify-content:space-between;gap:10px;padding:7px 12px;border-top:1px solid var(--border);font-size:12px;font-family:'DM Mono',monospace}
+.file:first-child{border-top:none}.file span:last-child{color:var(--text3);white-space:nowrap}
+.file .home{color:var(--green)}
+.site{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+.site:first-child{border-top:none}
+.site-name{font-weight:500;font-family:'DM Mono',monospace;font-size:13px;word-break:break-all}
+.site-desc{font-size:12px;color:var(--text2)}
+.site-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.chip{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);margin-right:4px}
+.chip.client{background:var(--green-dim);border-color:rgba(61,214,140,.25);color:var(--green)}
+.group-h{font-size:12px;font-weight:600;color:var(--text2);margin:18px 0 2px;text-transform:uppercase;letter-spacing:.06em}
+.group-h:first-child{margin-top:0}
+.picked{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:16px}
+.commits{font-size:12px;margin-top:8px}
+.commits div{display:flex;gap:8px;padding:3px 0;color:var(--text2)}
+.commits .mono{color:var(--text3);font-size:11px}
+details summary{cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;padding:4px 0;list-style:none}
+details summary::before{content:'▸ ';color:var(--text3)}
+details[open] summary::before{content:'▾ '}
+details>div{padding-top:12px}
+.step{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.step:last-child{border-bottom:none}
+.step-icon{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px}
+.step-icon.pending{background:var(--surface2);color:var(--text3);border:1px solid var(--border2)}
+.step-icon.running{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.25);animation:pulse 1s infinite}
+.step-icon.done{background:var(--green-dim);color:var(--green);border:1px solid rgba(61,214,140,.25)}
+.step-icon.skip{background:var(--surface2);color:var(--text3);border:1px solid var(--border2)}
+.step-icon.error{background:var(--red-dim);color:var(--red);border:1px solid rgba(240,106,106,.25)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.step-detail{font-size:11px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace;word-break:break-word}
+.result{background:var(--green-dim);border:1px solid rgba(61,214,140,.22);border-radius:12px;padding:18px 20px;margin-top:14px}
+.result.err{background:var(--red-dim);border-color:rgba(240,106,106,.22)}
+.result-url{font-family:'DM Mono',monospace;font-size:13px;color:var(--green);word-break:break-all;margin:6px 0 12px}
+.result .links{display:flex;flex-wrap:wrap;gap:8px}
+.msg{font-size:12px;margin-top:8px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.empty{color:var(--text3);font-size:13px;padding:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><div class="logo-icon">🚀</div><h1>Pages Deployer</h1></div>
+    <p class="subtitle">Publish a site to GitHub Pages in one tidy commit, with a README, a change log, a client tag and a catalog of every site you've published.</p>
+  </header>
+  <div id="app"></div>
+</div>
+
+<script>
+'use strict';
+// ---------------------------------------------------------------- settings
+const MANAGED_TOPIC = 'pages-deployer';      // marks repos this tool manages
+const CLIENT_PREFIX = 'client-';             // client topics look like client-listos
+const PRESERVE = /^(README\.md|CHANGELOG\.md|\.nojekyll|\.gitignore|LICENSE(\.\w+)?|CNAME|\.github\/.*)$/; // never removed by a clean deploy
+const JUNK = /(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini|\.git|node_modules)(\/|$)/;
+const API = 'https://api.github.com';
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+};
+const S = {
+  token: store.get('pd_token') || '', remember: store.get('pd_token') != null,
+  user: null, owners: [], connectError: '', connecting: false,
+  tab: store.get('pd_tab') || 'new',
+  repos: null, reposLoading: false, filter: '',
+  form: { owner: '', client: '', title: '', repo: '', repoTouched: false, desc: '', message: '', clean: false, readme: true, changelog: true, catalog: true, catalogRepo: store.get('pd_catalog') || 'pages-catalog' },
+  avail: null, files: [], home: '',
+  picked: null, pickedInfo: null,
+  run: null, result: null
+};
+
+// ---------------------------------------------------------------- helpers
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const slug = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+const fmtSize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(1) + ' MB';
+const fmtDate = d => new Date(d).toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
+const stamp = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const enc = new TextEncoder(), dec = new TextDecoder();
+function b64(bytes) { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
+function unb64(s) { const bin = atob(s.replace(/\s/g, '')); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+async function gitSha(bytes) { // the id git gives a file's content, to skip files that haven't changed
+  const head = enc.encode('blob ' + bytes.length + '\0'), all = new Uint8Array(head.length + bytes.length);
+  all.set(head); all.set(bytes, head.length);
+  return [...new Uint8Array(await crypto.subtle.digest('SHA-1', all))].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+const clientOf = r => ((r.topics || []).find(t => t.startsWith(CLIENT_PREFIX)) || '').slice(CLIENT_PREFIX.length);
+
+class GhError extends Error { constructor(status, msg) { super(msg); this.status = status; } }
+async function gh(path, method = 'GET', body) {
+  const res = await fetch(path.startsWith('http') ? path : API + path, {
+    method, headers: { Authorization: 'Bearer ' + S.token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const data = res.status === 204 ? null : await res.json().catch(() => null);
+  if (!res.ok) {
+    let msg = (data && data.message) || ('HTTP ' + res.status);
+    if (data && data.errors && data.errors.length) msg += ': ' + data.errors.map(e => e.message || e.code).join('; ');
+    if (res.status === 401) msg = 'GitHub rejected the token. It may be expired or mistyped.';
+    if (res.status === 403 && /Resource not accessible/i.test(msg)) msg = "The token doesn't have permission for this. " + msg;
+    throw new GhError(res.status, msg);
+  }
+  return data;
+}
+
+// ---------------------------------------------------------------- account
+async function connect() {
+  S.connecting = true; S.connectError = ''; render();
+  try {
+    S.user = await gh('/user');
+    const orgs = await gh('/user/orgs?per_page=100').catch(() => []);
+    S.owners = [S.user.login].concat(orgs.map(o => o.login));
+    if (!S.form.owner || !S.owners.includes(S.form.owner)) S.form.owner = store.get('pd_owner') && S.owners.includes(store.get('pd_owner')) ? store.get('pd_owner') : S.user.login;
+    store.set('pd_token', S.remember ? S.token : null);
+    loadRepos();
+  } catch (e) { S.user = null; S.connectError = e.message; }
+  S.connecting = false; render();
+}
+function disconnect() { S.user = null; S.token = ''; S.repos = null; store.set('pd_token', null); S.remember = false; render(); }
+
+async function loadRepos() {
+  S.reposLoading = true; render();
+  try {
+    let all = [];
+    for (let page = 1; page <= 5; page++) {
+      const batch = await gh(`/user/repos?per_page=100&sort=pushed&affiliation=owner,organization_member&page=${page}`);
+      all = all.concat(batch); if (batch.length < 100) break;
+    }
+    S.repos = all;
+  } catch (e) { S.repos = []; S.connectError = 'Could not list your repositories: ' + e.message; }
+  S.reposLoading = false; render();
+}
+const managedRepos = () => (S.repos || []).filter(r => (r.topics || []).includes(MANAGED_TOPIC) || r.has_pages);
+const knownClients = () => [...new Set((S.repos || []).map(clientOf).filter(Boolean))].sort();
+
+// ---------------------------------------------------------------- files
+async function addFiles(list) {
+  // list: [{path, file}] — strip a single shared top folder (dropping "my-site/" puts its contents at the root)
+  list = list.filter(f => !JUNK.test(f.path));
+  const tops = new Set(list.map(f => f.path.includes('/') ? f.path.split('/')[0] : ''));
+  if (list.length && tops.size === 1 && !tops.has('')) { const t = [...tops][0] + '/'; list.forEach(f => { f.path = f.path.slice(t.length); }); }
+  for (const { path, file } of list) {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    S.files = S.files.filter(f => f.path !== path).concat({ path, bytes, size: bytes.length });
+  }
+  S.files.sort((a, b) => a.path.localeCompare(b.path));
+  pickHome();
+  if (S.tab === 'new' && !S.form.title && S.files.length) {
+    const h = S.files.find(f => f.path === S.home) || S.files[0];
+    const t = dec.decode(h.bytes.subarray(0, 20000)).match(/<title>([^<]{1,120})<\/title>/i);
+    S.form.title = t ? t[1].trim() : h.path.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+    if (!S.form.repoTouched) suggestRepo();
+  }
+  render();
+}
+function pickHome() {
+  const htmls = S.files.filter(f => /\.html?$/i.test(f.path) && !f.path.includes('/'));
+  if (S.files.some(f => f.path === 'index.html')) S.home = 'index.html';
+  else if (!htmls.some(f => f.path === S.home)) S.home = htmls.length ? htmls[0].path : '';
+}
+async function readEntry(entry, prefix, out) { // walks a dropped folder
+  if (entry.isFile) { const file = await new Promise((ok, no) => entry.file(ok, no)); out.push({ path: prefix + file.name, file }); return; }
+  if (entry.isDirectory) {
+    const reader = entry.createReader(); let batch;
+    do { batch = await new Promise((ok, no) => reader.readEntries(ok, no)); for (const e of batch) await readEntry(e, prefix + entry.name + '/', out); } while (batch.length);
+  }
+}
+async function onDrop(ev) {
+  ev.preventDefault(); document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('over'));
+  const items = [...(ev.dataTransfer.items || [])].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  const out = [];
+  if (items.length) for (const e of items) await readEntry(e, '', out);
+  else [...ev.dataTransfer.files].forEach(file => out.push({ path: file.name, file }));
+  addFiles(out);
+}
+function finalFiles() { // what gets committed: the chosen home page is saved as index.html
+  return S.files.map(f => ({ path: f.path === S.home && S.home !== 'index.html' ? 'index.html' : f.path, bytes: f.bytes }));
+}
+
+// ---------------------------------------------------------------- new-site form
+function suggestRepo() { const c = slug(S.form.client), t = slug(S.form.title); S.form.repo = c && t && !t.startsWith(c) ? c + '-' + t : t || c; checkAvail(); }
+let availTimer = null;
+function checkAvail() {
+  clearTimeout(availTimer); const name = S.form.repo, owner = S.form.owner;
+  if (!name || !S.user) { S.avail = null; return; }
+  if (!/^[A-Za-z0-9._-]{1,100}$/.test(name)) { S.avail = 'invalid'; return; }
+  S.avail = 'checking';
+  availTimer = setTimeout(async () => {
+    try { await gh(`/repos/${owner}/${name}`); S.avail = 'taken'; }
+    catch (e) { S.avail = e.status === 404 ? 'free' : null; }
+    if (S.form.repo === name) renderAvail();
+  }, 350);
+}
+
+// ---------------------------------------------------------------- picking an existing site
+async function pickRepo(fullName) {
+  const r = (S.repos || []).find(x => x.full_name === fullName); if (!r) return;
+  S.picked = r; S.pickedInfo = null; S.files = []; S.home = ''; S.result = null; S.run = null;
+  Object.assign(S.form, { client: clientOf(r), desc: r.description || '', title: '', message: '', clean: false });
+  render(); window.scrollTo(0, 0);
+  try {
+    const [commits, pages] = await Promise.all([
+      gh(`/repos/${r.full_name}/commits?per_page=5`).catch(() => []),
+      gh(`/repos/${r.full_name}/pages`).catch(() => null)
+    ]);
+    let title = '';
+    try { const rd = await gh(`/repos/${r.full_name}/contents/README.md`); title = (dec.decode(unb64(rd.content)).match(/^#\s+(.+)$/m) || [])[1] || ''; } catch (e) {}
+    if (S.picked === r) { S.pickedInfo = { commits, pages }; S.form.title = title || r.name; render(); }
+  } catch (e) { S.pickedInfo = { commits: [], pages: null }; render(); }
+}
+
+// ---------------------------------------------------------------- README, changelog, catalog
+function readmeBlock(o) {
+  const files = o.files.map(f => '- `' + f.path + '`').join('\n');
+  return `<!-- deployer:start — this block is rewritten on every deploy; add your own notes below it -->
+# ${o.title}
+
+${o.desc || ''}
+
+**Live site:** ${o.url}
+
+| | |
+|---|---|
+${o.client ? `| Client / group | ${o.client} |\n` : ''}| Last deployed | ${stamp()} by ${o.by} |
+| History | [CHANGELOG.md](CHANGELOG.md) |
+
+### Files
+${files}
+<!-- deployer:end -->`;
+}
+function mergeReadme(existing, block) {
+  if (!existing) return block + '\n\n## Notes\n\n';
+  const m = existing.match(/<!-- deployer:start[\s\S]*?<!-- deployer:end -->/);
+  if (m) return existing.replace(m[0], block);
+  if (/^#\s/m.test(existing.split('\n')[0] || '')) existing = existing.replace(/^#\s.*\n?/, ''); // drop an old title line
+  return block + '\n\n' + existing.trim() + '\n';
+}
+function changelogEntry(o) {
+  const list = (label, a) => a.length ? `**${label}:** ` + a.slice().sort().map(p => '`' + p + '`').join(', ') + '\n' : '';
+  return `## ${stamp()} · ${o.message}\n\n${list('Added', o.added)}${list('Updated', o.updated)}${list('Removed', o.removed)}${!o.added.length && !o.updated.length && !o.removed.length ? 'Settings only, no file changes.\n' : ''}`;
+}
+function mergeChangelog(existing, entry) {
+  const head = '# Change log\n\nEvery deploy adds an entry here, newest first.\n';
+  const body = existing ? existing.replace(/^# Change log[\s\S]*?(?=^## )/m, '') : '';
+  return head + '\n' + entry + (body.trim() ? '\n' + body.trim() + '\n' : '');
+}
+function catalogMd(repos, owner) {
+  const groups = {};
+  repos.forEach(r => { const c = clientOf(r) || 'other'; (groups[c] = groups[c] || []).push(r); });
+  const order = Object.keys(groups).sort((a, b) => a === 'other' ? 1 : b === 'other' ? -1 : a.localeCompare(b));
+  let md = `# Pages catalog\n\nEvery site published with the Pages Deployer, grouped by client. Rebuilt automatically on each deploy (${stamp()}).\n\n`;
+  for (const g of order) {
+    md += `## ${g === 'other' ? 'No client tag' : g}\n\n| Site | What it is | Live | Last updated |\n|---|---|---|---|\n`;
+    groups[g].sort((a, b) => a.name.localeCompare(b.name)).forEach(r => {
+      const url = r.homepage || `https://${r.owner.login.toLowerCase()}.github.io/${r.name}/`;
+      md += `| [${r.full_name === owner + '/' + r.name ? r.name : r.full_name}](${r.html_url}) | ${(r.description || '').replace(/\|/g, '\\|')} | [open](${url}) | ${(r.pushed_at || '').slice(0, 10)} |\n`;
+    });
+    md += '\n';
+  }
+  return md;
+}
+
+// ---------------------------------------------------------------- deploy
+const STEPS = [['repo', 'Set up the repository'], ['files', 'Compare files with what is there'], ['commit', 'Commit the changes'], ['tidy', 'Update description, link and tags'], ['pages', 'Turn on GitHub Pages and wait for the build'], ['catalog', 'Update your catalog']];
+function step(id, state, detail) { S.run.steps[id] = { state, detail: detail || '' }; renderRun(); }
+
+async function deploy() {
+  const isNew = S.tab === 'new', f = S.form;
+  const owner = isNew ? f.owner : S.picked.owner.login, name = isNew ? f.repo.trim() : S.picked.name;
+  const problems = [];
+  if (!S.files.length && isNew) problems.push('Add at least one file.');
+  if (S.files.length && !S.home && !S.files.some(x => x.path === 'index.html')) problems.push('Pick which page is the home page.');
+  if (isNew && !/^[A-Za-z0-9._-]{1,100}$/.test(name)) problems.push('The repository name can use letters, numbers, hyphens, dots and underscores.');
+  if (isNew && S.avail === 'taken') problems.push('That repository already exists. Pick it in "Update a site" instead.');
+  if (!isNew && f.clean && !S.files.length) problems.push('A clean deploy needs the full set of files.');
+  if (problems.length) { S.result = { error: problems.join(' ') }; return render(); }
+
+  S.run = { steps: {} }; S.result = null; render();
+  document.getElementById('run').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const full = owner + '/' + name, client = slug(f.client), message = f.message.trim() || (isNew ? 'First deploy' : 'Update site');
+  let cur = 'repo', rebuilt = false;
+  try {
+    // 1. repository
+    step('repo', 'running', isNew ? 'Creating ' + full : full);
+    let repo;
+    if (isNew) {
+      const body = { name, description: f.desc.trim() || f.title, private: false, auto_init: true, has_wiki: false, has_projects: false, has_issues: true };
+      repo = await gh(owner === S.user.login ? '/user/repos' : `/orgs/${owner}/repos`, 'POST', body);
+      await sleep(1500); // GitHub needs a moment before a new repo accepts commits
+    } else repo = await gh('/repos/' + full);
+    const branch = repo.default_branch || 'main';
+    let ref;
+    try { ref = await gh(`/repos/${full}/git/ref/heads/${branch}`); }
+    catch (e) {
+      if (e.status !== 409 && e.status !== 404) throw e; // an empty repository has no branch yet: start one
+      await gh(`/repos/${full}/contents/.nojekyll`, 'PUT', { message: 'Start repository', content: '', branch });
+      ref = await gh(`/repos/${full}/git/ref/heads/${branch}`);
+    }
+    step('repo', 'done', (isNew ? 'Created ' : 'Using ') + repo.html_url.replace('https://', '') + ' · branch ' + branch);
+
+    // 2. files
+    cur = 'files'; step('files', 'running', 'Reading the current files');
+    const base = await gh(`/repos/${full}/git/commits/${ref.object.sha}`);
+    const tree = await gh(`/repos/${full}/git/trees/${base.tree.sha}?recursive=1`);
+    const existing = {}; tree.tree.filter(t => t.type === 'blob').forEach(t => { existing[t.path] = t; });
+    const pagesUrlGuess = (repo.homepage && /github\.io/.test(repo.homepage)) ? repo.homepage : `https://${owner.toLowerCase()}.github.io/${name}/`;
+    const site = finalFiles();
+    const sitePaths = new Set(site.map(x => x.path));
+    const changes = [];
+    for (const file of site) { const sha = await gitSha(file.bytes); file.sha = sha; if (!existing[file.path] || existing[file.path].sha !== sha) changes.push(file); }
+    const removed = f.clean ? Object.keys(existing).filter(p => !sitePaths.has(p) && !PRESERVE.test(p)) : [];
+    const added = changes.filter(x => !existing[x.path]).map(x => x.path), updated = changes.filter(x => existing[x.path]).map(x => x.path);
+    const nothing = !changes.length && !removed.length;
+    const readFile = async p => existing[p] ? dec.decode(unb64((await gh(`/repos/${full}/git/blobs/${existing[p].sha}`)).content)) : '';
+    const extras = [];
+    if (!existing['.nojekyll']) extras.push({ path: '.nojekyll', bytes: new Uint8Array(0) });
+    const by = S.user.name || S.user.login;
+    const allPaths = [...new Set([...Object.keys(existing).filter(p => !removed.includes(p)), ...sitePaths])].filter(p => !PRESERVE.test(p)).sort();
+    if (f.readme && !nothing) extras.push({ path: 'README.md', bytes: enc.encode(mergeReadme(await readFile('README.md'), readmeBlock({ title: f.title.trim() || name, desc: f.desc.trim(), url: pagesUrlGuess, client: f.client.trim(), by, files: allPaths.map(path => ({ path })) }))) });
+    if (f.changelog && !nothing) extras.push({ path: 'CHANGELOG.md', bytes: enc.encode(mergeChangelog(await readFile('CHANGELOG.md'), changelogEntry({ message, added, updated, removed }))) });
+    for (const x of extras) { x.sha = await gitSha(x.bytes); if (!existing[x.path] || existing[x.path].sha !== x.sha) changes.push(x); }
+    step('files', 'done', nothing ? 'No differences from what is already published' : [added.length && added.length + ' new', updated.length && updated.length + ' changed', removed.length && removed.length + ' removed', site.length - added.length - updated.length > 0 && (site.length - added.length - updated.length) + ' unchanged'].filter(Boolean).join(' · '));
+
+    // 3. commit
+    cur = 'commit';
+    let commit = null;
+    if (!changes.length && !removed.length) step('commit', 'skip', 'Nothing to commit');
+    else {
+      step('commit', 'running', 'Uploading ' + changes.length + ' file' + (changes.length === 1 ? '' : 's'));
+      const entries = []; let done = 0;
+      const queue = changes.slice();
+      await Promise.all([0, 1, 2].map(async () => {
+        while (queue.length) {
+          const x = queue.shift();
+          const blob = await gh(`/repos/${full}/git/blobs`, 'POST', { content: b64(x.bytes), encoding: 'base64' });
+          entries.push({ path: x.path, mode: '100644', type: 'blob', sha: blob.sha });
+          step('commit', 'running', 'Uploaded ' + (++done) + ' of ' + changes.length);
+        }
+      }));
+      removed.forEach(p => entries.push({ path: p, mode: '100644', type: 'blob', sha: null }));
+      const newTree = await gh(`/repos/${full}/git/trees`, 'POST', { base_tree: base.tree.sha, tree: entries });
+      commit = await gh(`/repos/${full}/git/commits`, 'POST', { message, tree: newTree.sha, parents: [ref.object.sha] });
+      await gh(`/repos/${full}/git/refs/heads/${branch}`, 'PATCH', { sha: commit.sha });
+      step('commit', 'done', '"' + message + '" · ' + commit.sha.slice(0, 7));
+    }
+
+    // 4. tidy the repo page
+    cur = 'tidy'; step('tidy', 'running');
+    const oldTopics = (await gh(`/repos/${full}/topics`).catch(() => ({ names: repo.topics || [] }))).names || [];
+    const topics = [...new Set(oldTopics.filter(t => !t.startsWith(CLIENT_PREFIX)).concat([MANAGED_TOPIC], client ? [CLIENT_PREFIX + client] : []))].slice(0, 20);
+    await gh(`/repos/${full}/topics`, 'PUT', { names: topics });
+    const desc = f.desc.trim() || repo.description || f.title.trim();
+    await gh('/repos/' + full, 'PATCH', { description: desc, homepage: pagesUrlGuess, has_wiki: false, has_projects: false });
+    step('tidy', 'done', 'Tags: ' + topics.join(', '));
+
+    // 5. pages
+    cur = 'pages'; step('pages', 'running', 'Checking Pages');
+    let pages = await gh(`/repos/${full}/pages`).catch(e => { if (e.status === 404) return null; throw e; });
+    if (!pages) pages = await gh(`/repos/${full}/pages`, 'POST', { source: { branch, path: '/' } }).catch(async e => { if (e.status === 409) return gh(`/repos/${full}/pages`); throw e; });
+    const url = (pages && pages.html_url) || pagesUrlGuess;
+    if (url !== pagesUrlGuess) await gh('/repos/' + full, 'PATCH', { homepage: url }).catch(() => {});
+    // Watch GitHub's real build run (Actions), not just the Pages summary, so a stuck or failed run is caught and retried.
+    const head = commit ? commit.sha : ref.object.sha;
+    const runFor = async () => { const r = await gh(`/repos/${full}/actions/runs?head_sha=${head}&per_page=5`).catch(() => null); return r && r.workflow_runs ? r.workflow_runs.find(w => /pages/i.test(w.name || '')) || r.workflow_runs[0] : undefined; };
+    const kick = async why => { step('pages', 'running', why); await gh(`/repos/${full}/pages/builds`, 'POST').catch(() => null); rebuilt = true; };
+    let status = 'queued', retried = false, started = Date.now(), run;
+    if (!commit && !isNew) {
+      run = await runFor();
+      if (run && run.status === 'completed' && run.conclusion === 'success') status = 'built';
+      else if (run && run.status !== 'completed' && Date.parse(run.created_at) < Date.now() - 5 * 60000) {
+        await gh(`/repos/${full}/actions/runs/${run.id}/cancel`, 'POST').catch(() => null); await sleep(4000);
+        await kick('The last build was stuck in GitHub\'s queue. Cancelled it and started a fresh one…'); retried = true; started = Date.now();
+      } else if (run && run.status === 'completed') { await kick('The last build failed. Asking GitHub to build again…'); retried = true; started = Date.now(); }
+      else if (!run) { const last = await gh(`/repos/${full}/pages/builds/latest`).catch(() => null); if (last && last.commit === head && last.status === 'built') status = 'built'; else { await kick('Asking GitHub to rebuild the live site…'); retried = true; started = Date.now(); } }
+    }
+    while (status !== 'built' && Date.now() - started < 4 * 60000) {
+      run = await runFor();
+      const secs = Math.round((Date.now() - started) / 1000);
+      if (run) {
+        if (run.status === 'completed' && run.conclusion === 'success' && Date.parse(run.updated_at) >= started - 60000) { status = 'built'; break; }
+        if (run.status === 'completed' && run.conclusion !== 'success' && Date.parse(run.updated_at) >= started - 60000) {
+          if (!retried) { await gh(`/repos/${full}/actions/runs/${run.id}/rerun`, 'POST').catch(() => kick('')); retried = true; rebuilt = true; started = Date.now(); step('pages', 'running', 'GitHub\'s build failed. Retrying once…'); await sleep(5000); continue; }
+          status = 'errored'; break;
+        }
+        if (run.status === 'queued' && secs > 120 && !retried) {
+          await gh(`/repos/${full}/actions/runs/${run.id}/cancel`, 'POST').catch(() => null); await sleep(4000);
+          await kick('Stuck in GitHub\'s queue. Cancelled and started a fresh build…'); retried = true; started = Date.now(); continue;
+        }
+        status = run.status === 'queued' ? 'waiting in GitHub\'s queue' : 'building';
+      } else {
+        const bl = await gh(`/repos/${full}/pages/builds/latest`).catch(() => null);
+        if (bl && bl.commit === head && bl.status === 'built' && secs > 6) { status = 'built'; break; }
+        if (bl && bl.commit === head && bl.status === 'errored') { status = 'errored'; break; }
+      }
+      step('pages', 'running', 'Building · ' + status + ' · ' + secs + 's');
+      await sleep(4000);
+    }
+    if (status === 'errored') throw new GhError(0, 'GitHub could not build the site, even after a retry. This is usually a passing GitHub problem: check githubstatus.com, then click Publish again. The Actions tab in the repository shows the reason.');
+    step('pages', status === 'built' ? 'done' : 'error', status === 'built' ? 'Live at ' + url : 'GitHub has not finished after 4 minutes (' + status + '). Your files are saved; click Publish again later and it will pick up from here.');
+
+    // 6. catalog
+    cur = 'catalog';
+    if (f.catalog && f.catalogRepo.trim()) {
+      step('catalog', 'running');
+      store.set('pd_catalog', f.catalogRepo.trim());
+      await loadRepos();
+      const managed = (S.repos || []).filter(r => (r.topics || []).includes(MANAGED_TOPIC) && r.name !== f.catalogRepo.trim());
+      const cat = S.user.login + '/' + f.catalogRepo.trim();
+      try { await gh('/repos/' + cat); }
+      catch (e) { if (e.status !== 404) throw e; await gh('/user/repos', 'POST', { name: f.catalogRepo.trim(), private: true, auto_init: true, description: 'Catalog of every site published with the Pages Deployer' }); await sleep(1500); }
+      const md = catalogMd(managed, S.user.login);
+      let sha; try { sha = (await gh(`/repos/${cat}/contents/README.md`)).sha; } catch (e) {}
+      await gh(`/repos/${cat}/contents/README.md`, 'PUT', { message: 'Catalog: ' + full + ' · ' + message, content: b64(enc.encode(md)), ...(sha ? { sha } : {}) });
+      step('catalog', 'done', 'github.com/' + cat + ' (private) · ' + managed.length + ' sites');
+    } else step('catalog', 'skip', 'Turned off');
+
+    S.result = { url, repo: repo.html_url, commit: commit && commit.html_url, history: repo.html_url + '/commits', nothing: nothing && !rebuilt, rebuilt: rebuilt && !commit, building: status !== 'built' };
+    if (status !== 'built') S.result.building = true;
+    if (isNew) { S.files = []; S.home = ''; }
+    loadRepos();
+  } catch (e) {
+    step(cur, 'error', e.message);
+    S.result = { error: e.message };
+  }
+  render();
+  document.getElementById('result') && document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ---------------------------------------------------------------- rendering
+function render() {
+  const a = document.activeElement, id = a && a.id, pos = a && a.selectionStart;
+  document.getElementById('app').innerHTML = accountCard() + (S.user ? tabs() + (S.tab === 'all' ? allSites() : S.tab === 'update' && !S.picked ? siteList() : deployForm()) : '');
+  if (id) { const el = document.getElementById(id); if (el) { el.focus(); try { if (pos != null) el.setSelectionRange(pos, pos); } catch (e) {} } }
+}
+function accountCard() {
+  if (S.user) return `<div class="card"><div class="row" style="justify-content:space-between">
+    <div class="row"><img src="${esc(S.user.avatar_url)}" alt="" width="28" height="28" style="border-radius:50%"><div><div style="font-weight:500">${esc(S.user.name || S.user.login)}</div><div class="hint" style="margin:0">Signed in as ${esc(S.user.login)}${S.owners.length > 1 ? ' · can publish to ' + esc(S.owners.slice(1).join(', ')) : ''}</div></div></div>
+    <button class="btn sm" data-a="disconnect">Sign out</button></div>${S.connectError ? `<p class="msg bad">${esc(S.connectError)}</p>` : ''}</div>`;
+  return `<div class="card"><div class="card-title">GitHub access</div>
+    <div class="field"><label for="token">Personal access token</label>
+      <div class="row"><input type="password" id="token" class="mono" placeholder="ghp_… or github_pat_…" value="${esc(S.token)}" autocomplete="off" data-i="token"><button class="btn" data-a="toggle-token" aria-label="Show or hide token">👁</button></div>
+      <p class="hint"><a href="https://github.com/settings/tokens/new?scopes=repo,workflow&description=Pages+Deployer" target="_blank" rel="noopener">Create a classic token</a> with the <strong>repo</strong> box checked. A fine-grained token also works if it has <strong>Administration</strong>, <strong>Contents</strong> and <strong>Pages</strong> set to read and write on all repositories.</p></div>
+    <label class="check"><input type="checkbox" id="remember" ${S.remember ? 'checked' : ''} data-c="remember"><span>Remember on this computer<small>Kept in this browser only. Leave unchecked on a shared computer.</small></span></label>
+    <button class="btn primary" data-a="connect" ${S.connecting ? 'disabled' : ''}>${S.connecting ? 'Connecting…' : 'Connect to GitHub'}</button>
+    ${S.connectError ? `<p class="msg bad">${esc(S.connectError)}</p>` : ''}</div>`;
+}
+const tabs = () => `<div class="tabs" role="tablist">${[['new', 'New site'], ['update', 'Update a site'], ['all', 'All sites']].map(([k, l]) => `<button class="tab" role="tab" aria-selected="${S.tab === k}" data-a="tab" data-v="${k}">${l}</button>`).join('')}</div>`;
+
+function siteRow(r, action) {
+  const c = clientOf(r), managed = (r.topics || []).includes(MANAGED_TOPIC);
+  return `<div class="site"><div style="min-width:0"><div class="site-name">${esc(r.owner.login === S.user.login ? r.name : r.full_name)}</div>
+    ${r.description ? `<div class="site-desc">${esc(r.description)}</div>` : ''}
+    <div class="site-meta">${c ? `<span class="chip client">${esc(c)}</span>` : ''}${!managed ? '<span class="chip">not organized yet</span>' : ''}${r.private ? '<span class="chip">private</span>' : ''}updated ${fmtDate(r.pushed_at)}</div></div>
+    <div class="row" style="flex:none">${r.homepage ? `<a class="btn sm" href="${esc(r.homepage)}" target="_blank" rel="noopener">Open</a>` : ''}<a class="btn sm" href="${esc(r.html_url)}" target="_blank" rel="noopener">Repo</a>${action ? `<button class="btn sm" data-a="pick" data-v="${esc(r.full_name)}">Update</button>` : ''}</div></div>`;
+}
+function filtered(list) { const q = S.filter.trim().toLowerCase(); return q ? list.filter(r => (r.full_name + ' ' + (r.description || '') + ' ' + (r.topics || []).join(' ')).toLowerCase().includes(q)) : list; }
+function siteList() {
+  if (S.reposLoading && !S.repos) return '<div class="card"><p class="empty">Loading your sites…</p></div>';
+  const list = filtered(managedRepos());
+  return `<div class="card"><div class="card-title">Pick a site to update</div>
+    <label class="vh" for="filter">Search sites</label><input type="search" id="filter" placeholder="Search by name, client or description" value="${esc(S.filter)}" data-i="filter">
+    <p class="hint">Sites marked "not organized yet" were published another way. Updating one here adds the README, change log and tags.</p>
+    <div style="margin-top:8px">${list.length ? list.map(r => siteRow(r, true)).join('') : '<p class="empty">No sites found.</p>'}</div></div>`;
+}
+function allSites() {
+  if (S.reposLoading && !S.repos) return '<div class="card"><p class="empty">Loading your sites…</p></div>';
+  const list = filtered(managedRepos()), groups = {};
+  list.forEach(r => { const c = clientOf(r) || ''; (groups[c] = groups[c] || []).push(r); });
+  const keys = Object.keys(groups).sort((a, b) => !a ? 1 : !b ? -1 : a.localeCompare(b));
+  return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:12px"><div class="card-title" style="margin:0">${list.length} site${list.length === 1 ? '' : 's'} on GitHub Pages</div><button class="btn sm" data-a="reload">Refresh</button></div>
+    <label class="vh" for="filter">Search sites</label><input type="search" id="filter" placeholder="Search by name, client or description" value="${esc(S.filter)}" data-i="filter">
+    <div style="margin-top:14px">${keys.map(k => `<div class="group-h">${k ? esc(k) : 'No client tag'} · ${groups[k].length}</div>${groups[k].map(r => siteRow(r, true)).join('')}`).join('') || '<p class="empty">No sites found.</p>'}</div>
+    <p class="hint" style="margin-top:14px">Your catalog repository (<a href="https://github.com/${esc(S.user.login)}/${esc(S.form.catalogRepo)}" target="_blank" rel="noopener">${esc(S.user.login)}/${esc(S.form.catalogRepo)}</a>) keeps this same list as a README, rebuilt on each deploy.</p></div>`;
+}
+function availHtml() {
+  return { checking: '<span class="hint">Checking…</span>', free: '<span class="hint ok">✓ Available</span>', taken: '<span class="hint warn">Already exists. Use "Update a site" to change it.</span>', invalid: '<span class="hint bad">Use letters, numbers, hyphens, dots or underscores.</span>' }[S.avail] || '';
+}
+function renderAvail() { const el = document.getElementById('avail'); if (el) el.innerHTML = availHtml(); }
+function filesHtml() {
+  if (!S.files.length) return '';
+  const htmls = S.files.filter(f => /\.html?$/i.test(f.path) && !f.path.includes('/'));
+  const total = S.files.reduce((n, f) => n + f.size, 0);
+  const big = S.files.filter(f => f.size > 25 * 1048576);
+  return `<div class="files">${S.files.map(f => `<div class="file"><span>${f.path === S.home && S.home !== 'index.html' ? `<span class="home">${esc(f.path)} → index.html</span>` : esc(f.path)}</span><span>${fmtSize(f.size)} <button class="btn sm" style="min-height:24px;padding:0 6px;margin-left:6px" data-a="rm-file" data-v="${esc(f.path)}" aria-label="Remove ${esc(f.path)}">×</button></span></div>`).join('')}</div>
+    <p class="hint">${S.files.length} file${S.files.length === 1 ? '' : 's'} · ${fmtSize(total)} · <button class="btn sm" style="min-height:24px;padding:0 8px" data-a="clear-files">Clear</button></p>
+    ${big.length ? `<p class="msg bad">${big.map(f => esc(f.path)).join(', ')} ${big.length === 1 ? 'is' : 'are'} over 25 MB, which GitHub won't accept this way.</p>` : ''}
+    ${!S.files.some(f => f.path === 'index.html') && htmls.length > 1 ? `<div class="field" style="margin-top:10px"><label for="home">Home page (saved as index.html)</label><select id="home" data-c="home">${htmls.map(h => `<option${h.path === S.home ? ' selected' : ''}>${esc(h.path)}</option>`).join('')}</select></div>` : ''}
+    ${!S.files.some(f => f.path === 'index.html') && !htmls.length && S.tab === 'new' ? '<p class="msg warn">There is no HTML page at the top level, so the site will have no home page.</p>' : ''}`;
+}
+function deployForm() {
+  const f = S.form, isNew = S.tab === 'new', p = S.picked;
+  let head = '';
+  if (!isNew) {
+    const info = S.pickedInfo;
+    head = `<div class="picked"><div class="row" style="justify-content:space-between"><div class="site-name">${esc(p.full_name)}</div><button class="btn sm" data-a="unpick">Choose another</button></div>
+      ${info && info.pages ? `<div class="site-meta">Live at <a href="${esc(info.pages.html_url)}" target="_blank" rel="noopener">${esc(info.pages.html_url)}</a></div>` : info ? '<div class="site-meta">GitHub Pages is not on yet. Deploying turns it on.</div>' : '<div class="site-meta">Loading…</div>'}
+      ${info && info.commits.length ? `<div class="commits">${info.commits.map(c => `<div><span class="mono">${esc(c.commit.author.date.slice(0, 10))}</span><span>${esc(c.commit.message.split('\n')[0])}</span></div>`).join('')}<div><a href="${esc(p.html_url)}/commits" target="_blank" rel="noopener">Full history →</a></div></div>` : ''}</div>`;
+  }
+  return `<div class="card">${head}
+    <div class="card-title">${isNew ? 'Project' : 'Details shown on GitHub'}</div>
+    ${isNew ? `<div class="grid"><div class="field"><label for="owner">Publish under</label><select id="owner" data-c="owner">${S.owners.map(o => `<option${o === f.owner ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select></div>` : '<div class="grid">'}
+    <div class="field"><label for="client">Client or group</label><input type="text" id="client" list="clients" placeholder="e.g. Listos, Carter Center, internal" value="${esc(f.client)}" data-i="client"><datalist id="clients">${knownClients().map(c => `<option value="${esc(c)}">`).join('')}</datalist></div>${isNew ? '</div>' : '</div>'}
+    <div class="field"><label for="title">Title</label><input type="text" id="title" placeholder="Listos Partner Survey" value="${esc(f.title)}" data-i="title"></div>
+    ${isNew ? `<div class="field"><label for="repo">Repository name</label><input type="text" id="repo" class="mono" placeholder="listos-partner-survey" value="${esc(f.repo)}" data-i="repo">
+      <div id="avail">${availHtml()}</div><p class="hint">Starts with the client so related sites sort together. The address will be <span class="mono">${esc((f.owner || '').toLowerCase())}.github.io/${esc(f.repo || '…')}</span></p></div>` : ''}
+    <div class="field"><label for="desc">One-line description</label><input type="text" id="desc" placeholder="What it is and who it's for" value="${esc(f.desc)}" data-i="desc"></div>
+  </div>
+  <div class="card"><div class="card-title">Files</div>
+    <div class="drop-zone" id="drop"><p class="drop-text">Drop <strong>files or a whole folder</strong> here</p>
+      <div class="row" style="justify-content:center"><label class="btn sm" style="margin:0;color:var(--text)">Choose files<input type="file" multiple class="vh" data-c="pick-files"></label><label class="btn sm" style="margin:0;color:var(--text)">Choose a folder<input type="file" webkitdirectory class="vh" data-c="pick-folder"></label></div></div>
+    ${filesHtml()}
+    ${!isNew ? `<label class="check" style="margin-top:14px"><input type="checkbox" ${f.clean ? 'checked' : ''} data-c="clean"><span>Replace the whole site<small>Removes files that aren't in this upload (README, change log and settings files stay). Leave unchecked to add or replace only these files.</small></span></label>` : ''}
+    <div class="field" style="margin-top:14px"><label for="message">What changed? <span style="color:var(--text3)">(saved in the history)</span></label><input type="text" id="message" placeholder="${isNew ? 'First deploy' : 'e.g. Fixed sign-in link, added Spanish'}" value="${esc(f.message)}" data-i="message"></div>
+    <details><summary>Housekeeping</summary><div>
+      <label class="check"><input type="checkbox" ${f.readme ? 'checked' : ''} data-c="readme"><span>Keep the README up to date<small>Title, description, live link, client and file list. Notes you add below the generated block are kept.</small></span></label>
+      <label class="check"><input type="checkbox" ${f.changelog ? 'checked' : ''} data-c="changelog"><span>Add an entry to CHANGELOG.md<small>Date, your note, and which files were added, changed or removed.</small></span></label>
+      <label class="check"><input type="checkbox" ${f.catalog ? 'checked' : ''} data-c="catalog"><span>Update my catalog of sites<small>A private repository listing every site by client.</small></span></label>
+      ${f.catalog ? `<div class="field" style="padding-left:26px"><label for="catalogRepo">Catalog repository</label><input type="text" id="catalogRepo" class="mono" value="${esc(f.catalogRepo)}" data-i="catalogRepo"></div>` : ''}
+      <p class="hint">Every deploy also tags the repository (<span class="mono">${MANAGED_TOPIC}</span>${f.client ? ', <span class="mono">' + CLIENT_PREFIX + esc(slug(f.client)) + '</span>' : ''}), sets its website link, turns off the unused wiki and projects tabs, and adds <span class="mono">.nojekyll</span> so GitHub serves files as they are.</p>
+    </div></details>
+  </div>
+  <button class="btn primary" data-a="deploy" ${S.run && !S.result ? 'disabled' : ''}>${isNew ? 'Create and publish →' : 'Publish update →'}</button>
+  <div id="run">${runHtml()}</div>`;
+}
+function runHtml() {
+  let h = '';
+  if (S.run) h += `<div class="card" style="margin-top:14px"><div class="card-title">Deploying</div>${STEPS.map(([id, label], i) => { const s = S.run.steps[id] || { state: 'pending' }; const icon = { done: '✓', error: '✗', skip: '–', running: '…' }[s.state] || i + 1; return `<div class="step"><div class="step-icon ${s.state}">${icon}</div><div><div>${label}</div>${s.detail ? `<div class="step-detail">${esc(s.detail)}</div>` : ''}</div></div>`; }).join('')}</div>`;
+  const r = S.result;
+  if (r && r.error) h += `<div class="result err" id="result"><div style="font-weight:600" class="bad">Not published</div><p class="msg bad" style="font-family:'DM Mono',monospace">${esc(r.error)}</p></div>`;
+  else if (r) h += `<div class="result" id="result"><div style="font-weight:600" class="ok">${r.building ? '⏳ Saved. GitHub is still building' : r.nothing ? 'Already up to date' : r.rebuilt ? '🎉 Rebuilt and live' : '🎉 Published'}</div><div class="result-url">${esc(r.url)}</div>
+    ${r.building ? '<p class="hint" style="margin:-6px 0 12px">Still building. Give it a minute before opening.</p>' : ''}
+    <div class="links"><a class="btn sm" href="${esc(r.url)}" target="_blank" rel="noopener">Open site ↗</a><button class="btn sm" data-a="copy" data-v="${esc(r.url)}">Copy link</button><a class="btn sm" href="${esc(r.repo)}" target="_blank" rel="noopener">Repository</a>${r.commit ? `<a class="btn sm" href="${esc(r.commit)}" target="_blank" rel="noopener">This change</a>` : ''}<a class="btn sm" href="${esc(r.history)}" target="_blank" rel="noopener">History</a></div></div>`;
+  return h;
+}
+function renderRun() { const el = document.getElementById('run'); if (el) el.innerHTML = runHtml(); }
+
+// ---------------------------------------------------------------- events
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const a = b.dataset.a, v = b.dataset.v;
+  if (a === 'connect') { S.token = document.getElementById('token').value.trim(); if (!S.token) { S.connectError = 'Paste a token first.'; return render(); } return connect(); }
+  if (a === 'toggle-token') { const t = document.getElementById('token'); t.type = t.type === 'password' ? 'text' : 'password'; return; }
+  if (a === 'disconnect') return disconnect();
+  if (a === 'tab') { S.tab = v; store.set('pd_tab', v); S.files = []; S.home = ''; S.run = null; S.result = null; S.picked = null; if (v === 'new') Object.assign(S.form, { client: '', title: '', repo: '', repoTouched: false, desc: '', message: '' }); S.avail = null; return render(); }
+  if (a === 'pick') { S.tab = 'update'; store.set('pd_tab', 'update'); return pickRepo(v); }
+  if (a === 'unpick') { S.picked = null; S.files = []; S.run = null; S.result = null; return render(); }
+  if (a === 'reload') return loadRepos();
+  if (a === 'rm-file') { S.files = S.files.filter(f => f.path !== v); pickHome(); return render(); }
+  if (a === 'clear-files') { S.files = []; S.home = ''; return render(); }
+  if (a === 'deploy') return deploy();
+  if (a === 'copy') { navigator.clipboard && navigator.clipboard.writeText(v).then(() => { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy link'; }, 1500); }); return; }
+});
+document.addEventListener('input', e => {
+  const k = e.target.dataset.i; if (!k) return;
+  const v = e.target.value;
+  if (k === 'token') { S.token = v; return; }
+  if (k === 'filter') { S.filter = v; return render(); }
+  S.form[k] = v;
+  if (k === 'repo') { S.form.repoTouched = !!v; checkAvail(); renderAvail(); return; }
+  if ((k === 'client' || k === 'title') && S.tab === 'new' && !S.form.repoTouched) { suggestRepo(); const r = document.getElementById('repo'); if (r) r.value = S.form.repo; renderAvail(); }
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset.c; if (!k) return;
+  const el = e.target;
+  if (k === 'remember') { S.remember = el.checked; if (!el.checked) store.set('pd_token', null); return; }
+  if (k === 'owner') { S.form.owner = el.value; store.set('pd_owner', el.value); checkAvail(); return render(); }
+  if (k === 'home') { S.home = el.value; return render(); }
+  if (k === 'pick-files') return addFiles([...el.files].map(file => ({ path: file.name, file })));
+  if (k === 'pick-folder') return addFiles([...el.files].map(file => ({ path: file.webkitRelativePath || file.name, file })));
+  if (['clean', 'readme', 'changelog', 'catalog'].includes(k)) { S.form[k] = el.checked; return render(); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'token') { e.preventDefault(); document.querySelector('[data-a=connect]').click(); } });
+document.addEventListener('dragover', e => { const z = e.target.closest && e.target.closest('.drop-zone'); if (z) { e.preventDefault(); z.classList.add('over'); } });
+document.addEventListener('dragleave', e => { const z = e.target.closest && e.target.closest('.drop-zone'); if (z) z.classList.remove('over'); });
+document.addEventListener('drop', e => { if (e.target.closest && e.target.closest('.drop-zone')) onDrop(e); else e.preventDefault(); });
+
+render();
+if (S.token) connect();
+</script>
+</body>
+</html>
